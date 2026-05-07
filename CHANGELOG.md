@@ -1,5 +1,8 @@
 # Changelog
 
+## [3.4.8](https://github.com/thheller/shadow-cljs/compare/a9bd397e30d6e1b2d15382e29bc4fa90f6e141e6...a9bd397e30d6e1b2d15382e29bc4fa90f6e141e6) - 2026-05-07
+- [ [`a9bd3`](https://github.com/thheller/shadow-cljs/commit/a9bd397e30d6e1b2d15382e29bc4fa90f6e141e6) ] lol
+
 ## [3.4.7](https://github.com/thheller/shadow-cljs/compare/880a61f22df1dea5a3046aa9cb1afcfcfabb9bb5...880a61f22df1dea5a3046aa9cb1afcfcfabb9bb5) - 2026-05-07
 - [ [`880a6`](https://github.com/thheller/shadow-cljs/commit/880a61f22df1dea5a3046aa9cb1afcfcfabb9bb5) ] fix missing :push-state/headers for :dev-http
 
