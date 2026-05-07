@@ -1,5 +1,9 @@
 # Changelog
 
+## [3.4.9](https://github.com/thheller/shadow-cljs/compare/7e40d2c6fbc53464ff129b13ceca09da0a9885be...f848d5a11cb5ef072a8e4ccbbb2a5fb415e50fff) - 2026-05-07
+- [ [`f848d`](https://github.com/thheller/shadow-cljs/commit/f848d5a11cb5ef072a8e4ccbbb2a5fb415e50fff) ] clj bump
+- [ [`7e40d`](https://github.com/thheller/shadow-cljs/commit/7e40d2c6fbc53464ff129b13ceca09da0a9885be) ] cljs 1.12.145
+
 ## [3.4.8](https://github.com/thheller/shadow-cljs/compare/a9bd397e30d6e1b2d15382e29bc4fa90f6e141e6...a9bd397e30d6e1b2d15382e29bc4fa90f6e141e6) - 2026-05-07
 - [ [`a9bd3`](https://github.com/thheller/shadow-cljs/commit/a9bd397e30d6e1b2d15382e29bc4fa90f6e141e6) ] lol
 
