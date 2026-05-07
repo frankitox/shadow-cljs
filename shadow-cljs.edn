@@ -22,7 +22,8 @@
  {}
 
  :dev-http
- {8605 "out/demo-browser/public"
+ {8605 {:root "out/demo-browser/public"
+        :push-state/headers {"hello" "world"}}
   8606 "out/demo-test-browser"
   8607 [".shadow-cljs/build-report"
         "src/ui-release/shadow/cljs/build_report/dist"]

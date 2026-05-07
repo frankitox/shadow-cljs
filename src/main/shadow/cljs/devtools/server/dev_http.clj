@@ -14,8 +14,9 @@
     [shadow.http.push-state :as push-state]
     [clojure.string :as str])
   (:import [java.net URI]
+           [java.util List]
            [javax.net.ssl SSLContext TrustManager X509TrustManager]
-           [shadow.http.server HttpHandler ProxyHandler]))
+           [shadow.http.server Config HandlerList HttpHandler ProxyHandler Server]))
 
 (defn require-var [sym]
   (try
@@ -96,6 +97,12 @@
                 (handle [this request]
                   (.setResponseHeader request "Access-Control-Allow-Origin" "*"))))
 
+            req-handler
+            (conj req-handler
+              (reify HttpHandler
+                (handle [this request]
+                  (tap> [:teh-fuck-is-this request]))))
+
             ;; first try user configured roots
             req-handler
             (reduce
@@ -149,11 +156,30 @@
                   (and ssl-context (not (false? (:ssl config))))
                   (assoc :ssl-context ssl-context)))
 
+            server-config
+            (doto (Config.)
+              ;; not using index files by default for file/classpath so it falls through to push-state handler
+              ;; which does this but also may set :push-state/headers
+              (.setUseIndexFiles (get config :use-index-files false)))
+
+            http-handler
+            (HandlerList/create ^List req-handler)
+
+            host
+            (or host "0.0.0.0")
+
             http-server
             (when (or (not ssl-context)
                       (and port ssl-port))
               (try
-                (http-server/start {:port port :host host} req-handler)
+                (let [server
+                      (doto (Server. server-config)
+                        (.setHandler http-handler)
+                        (.start host port))]
+
+                  {:server server
+                   :port (.getLocalPort (.getSocket server))
+                   :host host})
                 (catch Exception e
                   (log/warn-ex e ::http-start-ex {:http-options http-options :config config})
                   nil)))
@@ -161,7 +187,15 @@
             https-server
             (when ssl-context
               (try
-                (http-server/start {:port (or ssl-port port) :host host :ssl-context ssl-context} req-handler)
+                (let [server
+                      (doto (Server. server-config)
+                        (.setHandler http-handler)
+                        (.startSSL ssl-context host (or ssl-port port)))]
+
+                  {:server server
+                   :ssl true
+                   :port (.getLocalPort (.getSocket server))
+                   :host host})
                 (catch Exception e
                   (log/warn-ex e ::http-start-ex {:http-options http-options :config config})
                   nil)))
@@ -418,7 +452,7 @@
                             :msg "shadow-cljs - HTTP config change, restarting servers"})
                   (swap! state-ref stop-servers)
                   (swap! state-ref assoc
-                    :servers (start-servers sys-bus new-configs ssl-context out)
+                    :servers (start-servers config sys-bus new-configs ssl-context out)
                     :configs new-configs)
 
                   (sync-servers sync-db (:servers @state-ref)))
