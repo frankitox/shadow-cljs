@@ -1,5 +1,8 @@
 # Changelog
 
+## [3.4.7](https://github.com/thheller/shadow-cljs/compare/880a61f22df1dea5a3046aa9cb1afcfcfabb9bb5...880a61f22df1dea5a3046aa9cb1afcfcfabb9bb5) - 2026-05-07
+- [ [`880a6`](https://github.com/thheller/shadow-cljs/commit/880a61f22df1dea5a3046aa9cb1afcfcfabb9bb5) ] fix missing :push-state/headers for :dev-http
+
 ## [3.4.6](https://github.com/thheller/shadow-cljs/compare/0db144ce3484ca4a6e7c2cb31e9d6a58ada5e794...f4004f7f30d107f809337104965d45eb279a4650) - 2026-04-28
 - [ [`f4004`](https://github.com/thheller/shadow-cljs/commit/f4004f7f30d107f809337104965d45eb279a4650) ] restore lost css reloading
 - [ [`0db14`](https://github.com/thheller/shadow-cljs/commit/0db144ce3484ca4a6e7c2cb31e9d6a58ada5e794) ] don't watch cljs-runtime dirs
