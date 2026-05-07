@@ -97,12 +97,6 @@
                 (handle [this request]
                   (.setResponseHeader request "Access-Control-Allow-Origin" "*"))))
 
-            req-handler
-            (conj req-handler
-              (reify HttpHandler
-                (handle [this request]
-                  (tap> [:teh-fuck-is-this request]))))
-
             ;; first try user configured roots
             req-handler
             (reduce
