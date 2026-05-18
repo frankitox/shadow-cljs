@@ -1,5 +1,9 @@
 # Changelog
 
+## [3.4.11](https://github.com/thheller/shadow-cljs/compare/0ea2b4275bd9754ffe4815fe9d0d6bc18acf48c6...bd2574b96c1170f71ceef90198721179e81b17d9) - 2026-05-18
+- [ [`bd257`](https://github.com/thheller/shadow-cljs/commit/bd2574b96c1170f71ceef90198721179e81b17d9) ] fix for CLJS-2292
+- [ [`0ea2b`](https://github.com/thheller/shadow-cljs/commit/0ea2b4275bd9754ffe4815fe9d0d6bc18acf48c6) ] fix npm-deps config scoping
+
 ## [3.4.10](https://github.com/thheller/shadow-cljs/compare/2911c9082dac3a571e5895d14a17c46d642d4f92...2911c9082dac3a571e5895d14a17c46d642d4f92) - 2026-05-12
 - [ [`2911c`](https://github.com/thheller/shadow-cljs/commit/2911c9082dac3a571e5895d14a17c46d642d4f92) ] shadow-http bump
 
