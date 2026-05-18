@@ -50,8 +50,7 @@
     (vals deps-to-install)))
 
 (defn guess-node-package-manager [config]
-  (or (get-in config [:node-modules :managed-by])
-      (get-in config [:npm-deps :managed-by])
+  (or (get-in config [:npm-deps :managed-by])
       (let [bun-lock (io/file "bun.lockb")]
         (when (.exists bun-lock)
           :bun))
@@ -91,8 +90,7 @@
         (io/file install-dir "package.json")
 
         install-cmd
-        (or (get-in config [:node-modules :install-cmd])
-            (get-in config [:npm-deps :install-cmd])
+        (or (get-in config [:npm-deps :install-cmd])
             (case (guess-node-package-manager config)
               :bun
               ["bun" "add" "--exact"]
@@ -138,7 +136,7 @@
 
 (comment
   (install-deps
-    {:node-modules
+    {:npm-deps
      {:install-cmd ["hello" :packages "world"]}}
     [{:id "hello"
       :version "1.2.3"}]))
@@ -182,7 +180,7 @@
 
 (defn main
   ([]
-   (main (:npm-deps (config/load-cljs-edn!))))
+   (main (config/load-cljs-edn!)))
   ([{:keys [npm-deps] :as config}]
    (let [{:keys [install-dir] :or {install-dir "."}}
          npm-deps
