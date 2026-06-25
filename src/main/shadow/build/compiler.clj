@@ -957,34 +957,82 @@
             ;; compile again .. since we were compiled today the min-age is today
             ;; which is larger than v2 release date thereby using cache if only checking one timestamp
 
-            (when (and (= cache-key-map (:cache-keys cache-data))
-                       (macros/check-clj-info (:clj-info cache-data))
+            (let [cache-keys-ok?
+                  (= cache-key-map (:cache-keys cache-data))
+
+                  _ (when-not cache-keys-ok?
+                      (let [stored (:cache-keys cache-data)
+                            all-keys (into #{} (concat (keys cache-key-map) (keys stored)))
+                            changed (into [] (filter #(not= (get cache-key-map %) (get stored %)) all-keys))]
+                        (util/log state {:type :cache-miss
+                                         :resource-name resource-name
+                                         :reason :cache-keys
+                                         :changed changed})))
+
+                  clj-info-ok?
+                  (and cache-keys-ok? (macros/check-clj-info (:clj-info cache-data)))
+
+                  _ (when (and cache-keys-ok? (not clj-info-ok?))
+                      (let [stale (reduce-kv
+                                    (fn [acc url-string last-mod]
+                                      (let [url (java.net.URL. url-string)]
+                                        (if (not= last-mod (util/url-last-modified url))
+                                          (conj acc url-string)
+                                          acc)))
+                                    []
+                                    (:clj-info cache-data))]
+                        (util/log state {:type :cache-miss
+                                         :resource-name resource-name
+                                         :reason :macro-changed
+                                         :changed stale})))
+
+                  compiler-opts-ok?
+                  (and clj-info-ok?
                        (every?
                          #(= (get-in state %)
                              (get-in cache-data [:compiler-options %]))
-                         cache-affecting-options)
+                         cache-affecting-options))
 
-                       ;; check if lazy loaded namespaces that a given ns uses were moved to different modules
+                  _ (when (and clj-info-ok? (not compiler-opts-ok?))
+                      (let [changed (into [] (filter #(not= (get-in state %) (get-in cache-data [:compiler-options %])) cache-affecting-options))]
+                        (util/log state {:type :cache-miss
+                                         :resource-name resource-name
+                                         :reason :compiler-options
+                                         :changed changed})))
+
+                  lazy-refs-ok?
+                  (and compiler-opts-ok?
                        (let [lazy-refs (::lazy/ns-refs ana-data)]
                          (reduce-kv
                            (fn [_ ns assigned-module]
                              (or (= assigned-module (lazy/module-for-ns compiler-env ns))
                                  (reduced false)))
                            true
-                           lazy-refs))
+                           lazy-refs)))
 
-                       ;; check if any of the referenced resources were updated
+                  _ (when (and compiler-opts-ok? (not lazy-refs-ok?))
+                      (util/log state {:type :cache-miss
+                                       :resource-name resource-name
+                                       :reason :lazy-module-assignment}))
+
+                  resource-refs-ok?
+                  (and lazy-refs-ok?
                        (let [resource-refs (:shadow.resource/resource-refs ana-data)]
                          (reduce-kv
                            (fn [_ path prev-mod]
                              (let [rc (io/resource path)]
-                               ;; check if the timestamps still match
-                               ;; if the rc is gone or the timestamp changed invalidate the cache
                                (if (and rc (= prev-mod (util/url-last-modified rc)))
                                  true
                                  (reduced false))))
                            true
                            resource-refs)))
+
+                  _ (when (and lazy-refs-ok? (not resource-refs-ok?))
+                      (util/log state {:type :cache-miss
+                                       :resource-name resource-name
+                                       :reason :resource-ref-changed}))]
+
+            (when resource-refs-ok?
 
               ;; restore analysis data
               (let [{:keys [ns]} cache-data]
@@ -1004,7 +1052,7 @@
                 (let [priv-var (find-var 'cljs.spec.alpha/_speced_vars)]
                   (swap! @priv-var set/union ns-spec-vars)))
 
-              (assoc (:output cache-data) :cached true)))))
+              (assoc (:output cache-data) :cached true))))))
 
       (catch Exception e
         (util/warn state {:type :cache-error

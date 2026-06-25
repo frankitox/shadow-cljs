@@ -45,6 +45,11 @@
   [{:keys [source-ids n-compile-threads] :as event}]
   (format "Compiling %d CLJS sources" (count source-ids)))
 
+(defmethod event->str :cache-miss
+  [{:keys [resource-name reason changed]}]
+  (format "Cache miss: %s [%s]%s" resource-name (name reason)
+          (if (seq changed) (str " " (pr-str changed)) "")))
+
 (defmethod event->str :cache-read
   [{:keys [resource-name] :as event}]
   (format "Cache read: %s" resource-name))
