@@ -11,7 +11,7 @@
            (java.io File StringWriter ByteArrayOutputStream IOException)
            (java.security MessageDigest)
            (java.nio.charset Charset)
-           [java.net URLConnection URL]))
+           [java.net URLConnection URL JarURLConnection]))
 
 (defn build-state? [state]
   ;; not using shadow.build.data because of a cyclic dependency I need to clean up
@@ -294,14 +294,16 @@
 
 (defn url-last-modified* [^URL url]
   (try
-    (let [^URLConnection con (.openConnection url)
-          ;; not looking at it but only way to close file:... connections
-          ;; which keep the file open and will leak otherwise
-          stream (.getInputStream con)]
-      (try
-        (.getLastModified con)
-        (finally
-          (.close stream))))
+    (let [^URLConnection con (.openConnection url)]
+      (if (instance? JarURLConnection con)
+        ;; read the zip entry's own timestamp, which is stable regardless of
+        ;; when the jar file was downloaded or extracted on the filesystem
+        (.getTime (.getJarEntry ^JarURLConnection con))
+        (let [stream (.getInputStream con)]
+          (try
+            (.getLastModified con)
+            (finally
+              (.close stream))))))
     (catch IOException e
       -1)))
 
